@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: basic-larp-web
+    ports:
+      - "8080:4173" # Maps host port 8080 to container port 4173 (Vite preview default)
+    # Uncomment the following lines if you want to use the development server (npm run dev)
+    # and mount your local source code for live reloading.
+    # volumes:
+    #   - .:/app
+    # command: npm run dev
