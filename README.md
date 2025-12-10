@@ -30,7 +30,7 @@ git clone <your-repository-url>
 cd LARP-BASIC-WEB
 
 # เริ่มต้นด้วย Docker Compose
-docker-compose up -d
+docker compose up -d
 
 # เข้าใช้งานแอปพลิเคชัน
 # Production: http://localhost:8080

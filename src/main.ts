@@ -31,6 +31,10 @@ function clearScreen() {
     miningStatusDiv.innerHTML = '';
 }
 
+function formatBlockhash(hash: number): string {
+    return hash.toString().padStart(6, '0');
+}
+
 function setMiningUI(isMining: boolean) {
     if (isMining) {
         verifyBtn.style.display = 'none';
@@ -87,12 +91,12 @@ function handleVerify() {
     const block_hash = calculate_result(values.prev_block, values.tx_commit, values.target, values.time_val, values.nonce);
 
     logToScreen(`--------------------------------`, 'normal');
-    logToScreen(`Calculated Blockhash: ${block_hash}`, 'success');
+    logToScreen(`Calculated Blockhash: ${formatBlockhash(block_hash)}`, 'success');
 
     if (block_hash <= values.target) {
-        logToScreen(`SUCCESS! Blockhash (${block_hash}) is less than or equal to Target (${values.target}).`, 'success');
+        logToScreen(`SUCCESS! Blockhash (${formatBlockhash(block_hash)}) is less than or equal to Target (${values.target}).`, 'success');
     } else {
-        logToScreen(`FAILURE! Blockhash (${block_hash}) is greater than Target (${values.target}).`, 'warn');
+        logToScreen(`FAILURE! Blockhash (${formatBlockhash(block_hash)}) is greater than Target (${values.target}).`, 'warn');
     }
 }
 
@@ -132,14 +136,14 @@ function handleMine() {
             if (block_hash < lowest_hash) {
                 lowest_hash = block_hash;
                 best_nonce = nonce_try;
-                logToScreen(`New best hash: ${lowest_hash} (Nonce: ${best_nonce})`, 'info');
+                logToScreen(`New best hash: ${formatBlockhash(lowest_hash)} (Nonce: ${best_nonce})`, 'info');
             }
 
             if (block_hash <= target) {
                 logToScreen(`--------------------------------`, 'normal');
                 logToScreen(`SUCCESS! Found a valid nonce.`, 'success');
                 logToScreen(`Winning Nonce: ${nonce_try}`, 'success');
-                logToScreen(`Blockhash: ${block_hash}`, 'success');
+                logToScreen(`Blockhash: ${formatBlockhash(block_hash)}`, 'success');
                 stopMining();
                 return;
             }
@@ -147,7 +151,7 @@ function handleMine() {
 
         const currentTime = performance.now();
         if (currentTime - lastStatusUpdateTime > updateIntervalMs) {
-            miningStatusDiv.textContent = `Tries: ${nonce_try}\nLowest Hash: ${lowest_hash}\nBest Nonce: ${best_nonce}`;
+            miningStatusDiv.textContent = `Tries: ${nonce_try}\nLowest Hash: ${formatBlockhash(lowest_hash)}\nBest Nonce: ${best_nonce}`;
             lastStatusUpdateTime = currentTime;
         }
 

@@ -7,13 +7,13 @@
 #### Production Mode
 ```bash
 # Build และ run container
-docker-compose up -d
+docker compose up -d
 
 # ดู logs
-docker-compose logs -f
+docker compose logs -f
 
 # หยุด container
-docker-compose down
+docker compose down
 ```
 
 เข้าใช้งานที่: http://localhost:8080
@@ -21,7 +21,7 @@ docker-compose down
 #### Development Mode
 แก้ไข `docker-compose.yml` โดย comment service `web` และ uncomment service `web-dev` แล้วรัน:
 ```bash
-docker-compose up -d web-dev
+docker compose up -d web-dev
 ```
 
 เข้าใช้งานที่: http://localhost:5173
