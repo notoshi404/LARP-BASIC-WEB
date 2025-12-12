@@ -1,4 +1,4 @@
-import RIPEMD160 from 'crypto-js/ripemd160';
+import SHA256 from 'crypto-js/sha256';
 import WordArray from 'crypto-js/lib-typedarrays';
 
 function toBytesInt16BE(num: number): number[] {
@@ -10,7 +10,6 @@ function toBytesInt32LE(num: number): number[] {
 }
 
 export function calculate_result(prev_block: number, tx_commit: number, target: number, time_val: number, nonce_val: number): number {
-    const prefix = "BTC-LARP:".split('').map(c => c.charCodeAt(0));
     const prevBlockBytes = toBytesInt16BE(prev_block);
     const txCommitBytes = toBytesInt16BE(tx_commit);
     const timeValBytes = toBytesInt16BE(time_val);
@@ -18,7 +17,6 @@ export function calculate_result(prev_block: number, tx_commit: number, target: 
     const nonceBytes = toBytesInt32LE(nonce_val);
 
     const data = new Uint8Array([
-        ...prefix,
         ...prevBlockBytes,
         ...txCommitBytes,
         ...timeValBytes,
@@ -27,22 +25,13 @@ export function calculate_result(prev_block: number, tx_commit: number, target: 
     ]);
 
     const dataWordArray = WordArray.create(data);
-    const hashWordArray = RIPEMD160(dataWordArray);
 
-    let result = 0;
-    let accum = 1;
+    const firstHash = SHA256(dataWordArray);
+    const hashWordArray = SHA256(firstHash);
 
-    for (let i = 0; i < 5; i++) {
-        const byteIndex = i;
-        const wordIndex = Math.floor(byteIndex / 4);
-        const byteInWord = 3 - (byteIndex % 4);
-        const word = hashWordArray.words[wordIndex];
-        const hr = (word >> (byteInWord * 8)) & 0xff;
+    let result = hashWordArray.words[0];
 
-        const term = Math.imul(accum, hr);
-        result = (result + term) >>> 0;
-        accum = Math.imul(accum, 255);
-    }
+    result = result >>> 0;
 
     return result;
 }

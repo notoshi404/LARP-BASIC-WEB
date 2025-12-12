@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="icon" type="image/svg+xml"
+    href="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/bitcoin.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LARP - BASIC Simulator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,27 +22,32 @@
 
     <main>
       <div class="form-container">
-        <h2>Parameters</h2>
+        <h2>Block header</h2>
         <div class="input-grid">
           <div class="input-group">
             <label for="prev_block">Prev Block</label>
-            <input type="number" id="prev_block" name="prev_block" maxlength="6" placeholder="e.g., 123456">
+            <input type="number" id="prev_block" name="prev_block" maxlength="6" placeholder="e.g., 123456"
+              oninput="if(this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
           </div>
           <div class="input-group">
             <label for="tx_commit">Tx Commit</label>
-            <input type="number" id="tx_commit" name="tx_commit" maxlength="4" placeholder="e.g., 7890">
+            <input type="number" id="tx_commit" name="tx_commit" maxlength="4" placeholder="e.g., 7890"
+              oninput="if(this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
           </div>
           <div class="input-group">
             <label for="time_val">Time</label>
-            <input type="number" id="time_val" name="time_val" maxlength="4" placeholder="e.g., 1234">
+            <input type="number" id="time_val" name="time_val" maxlength="4" placeholder="e.g., 1234"
+              oninput="if(this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
           </div>
           <div class="input-group">
             <label for="target">Target</label>
-            <input type="number" id="target" name="target" maxlength="6" placeholder="e.g., 987654">
+            <input type="number" id="target" name="target" maxlength="6" placeholder="e.g., 987654"
+              oninput="if(this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
           </div>
           <div class="input-group">
             <label for="nonce">Nonce</label>
-            <input type="number" id="nonce" name="nonce" maxlength="6" placeholder="Enter a nonce to verify">
+            <input type="number" id="nonce" name="nonce" maxlength="6" placeholder="Enter a nonce to verify"
+              oninput="if(this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
           </div>
         </div>
         <div class="button-group">
@@ -58,6 +64,7 @@
           <div id="log-output" class="log-output">
             <p>Enter parameters and start an action.</p>
           </div>
+          <div id="mining-timer" class="mining-timer" style="display: none;">Time: 00:00</div>
         </div>
       </div>
     </main>

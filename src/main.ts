@@ -1,8 +1,12 @@
 import './style.css'
 import { calculate_result } from './hashing';
 
+// ============================================================
+// DOM Elements
+// ============================================================
 const miningStatusDiv = document.getElementById('mining-status')!;
 const logOutputDiv = document.getElementById('log-output')!;
+const miningTimerDiv = document.getElementById('mining-timer')!;
 
 const prevBlockInput = document.getElementById('prev_block') as HTMLInputElement;
 const txCommitInput = document.getElementById('tx_commit') as HTMLInputElement;
@@ -14,7 +18,19 @@ const verifyBtn = document.getElementById('verify-btn')!;
 const mineBtn = document.getElementById('mine-btn')!;
 const stopBtn = document.getElementById('stop-btn')!;
 
+// ============================================================
+// Global State
+// ============================================================
 let miningInterval: number | null = null;
+let timerInterval: number | null = null;
+let startTime: number = 0;
+
+// ============================================================
+// Utility Functions
+// ============================================================
+function formatBlockhash(hash: number): string {
+    return hash.toString().padStart(6, '0');
+}
 
 function logToScreen(message: string, type: 'info' | 'success' | 'error' | 'warn' | 'normal' = 'normal') {
     const p = document.createElement('p');
@@ -31,10 +47,34 @@ function clearScreen() {
     miningStatusDiv.innerHTML = '';
 }
 
-function formatBlockhash(hash: number): string {
-    return hash.toString().padStart(6, '0');
+// ============================================================
+// Input Validation
+// ============================================================
+function getValidatedInputs(checkNonce: boolean) {
+    const values = {
+        prev_block: parseInt(prevBlockInput.value.slice(0, 6) || "0", 10),
+        tx_commit: parseInt(txCommitInput.value.slice(0, 4) || "0", 10),
+        time_val: parseInt(timeValInput.value.slice(0, 4) || "0", 10),
+        target: parseInt(targetInput.value.slice(0, 6) || "0", 10),
+        nonce: parseInt(nonceInput.value.slice(0, 6) || "0", 10),
+    };
+
+    if (isNaN(values.prev_block) || isNaN(values.tx_commit) || isNaN(values.time_val) || isNaN(values.target)) {
+        logToScreen('Error: Please fill all parameter fields.', 'error');
+        return null;
+    }
+
+    if (checkNonce && isNaN(values.nonce)) {
+        logToScreen('Error: Please enter a nonce to verify.', 'error');
+        return null;
+    }
+
+    return values;
 }
 
+// ============================================================
+// UI Control
+// ============================================================
 function setMiningUI(isMining: boolean) {
     if (isMining) {
         verifyBtn.style.display = 'none';
@@ -57,28 +97,55 @@ function setMiningUI(isMining: boolean) {
     }
 }
 
-function getValidatedInputs(checkNonce: boolean) {
-    const values = {
-        prev_block: parseInt(prevBlockInput.value, 10),
-        tx_commit: parseInt(txCommitInput.value, 10),
-        time_val: parseInt(timeValInput.value, 10),
-        target: parseInt(targetInput.value, 10),
-        nonce: parseInt(nonceInput.value, 10),
-    };
-
-    if (isNaN(values.prev_block) || isNaN(values.tx_commit) || isNaN(values.time_val) || isNaN(values.target)) {
-        logToScreen('Error: Please fill all parameter fields.', 'error');
-        return null;
-    }
-
-    if (checkNonce && isNaN(values.nonce)) {
-        logToScreen('Error: Please enter a nonce to verify.', 'error');
-        return null;
-    }
-
-    return values;
+// ============================================================
+// Timer Functions
+// ============================================================
+function updateTimer() {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+    const seconds = (elapsed % 60).toString().padStart(2, '0');
+    miningTimerDiv.textContent = `Time: ${minutes}:${seconds}`;
 }
 
+function startTimer() {
+    startTime = Date.now();
+    miningTimerDiv.style.display = 'block';
+    updateTimer();
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = window.setInterval(updateTimer, 1000);
+}
+
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
+// ============================================================
+// Audio Functions
+// ============================================================
+function playSuccessSound() {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+}
+
+// ============================================================
+// Verify Handler
+// ============================================================
 function handleVerify() {
     clearScreen();
     logToScreen('Starting verification...');
@@ -100,28 +167,38 @@ function handleVerify() {
     }
 }
 
+// ============================================================
+// Mining Handler
+// ============================================================
 function handleMine() {
     clearScreen();
+    miningTimerDiv.textContent = 'Time: 00:00';
+
     logToScreen('Starting mining process...');
     const values = getValidatedInputs(false);
     if (!values) return;
 
-    const { prev_block, tx_commit, target, time_val } = values;
+    const { prev_block, tx_commit, target, time_val, nonce } = values;
 
     setMiningUI(true);
+    startTimer();
 
-    let nonce_try = 0;
+    let nonce_try = isNaN(nonce) ? 0 : nonce;
     let lowest_hash = Infinity;
-    let best_nonce = 0;
-    const max_tries = 1000000;
-    const updateIntervalMs = 2;
+    let best_nonce = nonce_try;
+    const max_tries = 999999;
+    const updateIntervalMs = 10;
     let lastStatusUpdateTime = performance.now();
 
     logToScreen(`Target to beat: ${target}`, 'info');
+    if (!isNaN(nonce)) {
+        logToScreen(`Starting from nonce: ${nonce}`, 'info');
+    }
     logToScreen(`--------------------------------`, 'normal');
 
     miningInterval = window.setInterval(() => {
-        const batchSize = 21;
+        const batchSize = 3;
+
         for (let i = 0; i < batchSize; i++) {
             nonce_try++;
 
@@ -140,6 +217,7 @@ function handleMine() {
             }
 
             if (block_hash <= target) {
+                playSuccessSound();
                 logToScreen(`--------------------------------`, 'normal');
                 logToScreen(`SUCCESS! Found a valid nonce.`, 'success');
                 logToScreen(`Winning Nonce: ${nonce_try}`, 'success');
@@ -154,7 +232,6 @@ function handleMine() {
             miningStatusDiv.textContent = `Tries: ${nonce_try}\nLowest Hash: ${formatBlockhash(lowest_hash)}\nBest Nonce: ${best_nonce}`;
             lastStatusUpdateTime = currentTime;
         }
-
     }, 0);
 }
 
@@ -162,12 +239,16 @@ function stopMining() {
     if (miningInterval) {
         clearInterval(miningInterval);
         miningInterval = null;
-        logToScreen('Mining process stopped by user.', 'info');
+        logToScreen('Mining process stopped.', 'info');
     }
     setMiningUI(false);
+    stopTimer();
     miningStatusDiv.textContent = '';
 }
 
+// ============================================================
+// Initialization
+// ============================================================
 function init() {
     verifyBtn.addEventListener('click', handleVerify);
     mineBtn.addEventListener('click', handleMine);

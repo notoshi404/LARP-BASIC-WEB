@@ -62,7 +62,8 @@ h2 {
   font-weight: normal;
 }
 
-.form-container, .results-container {
+.form-container,
+.results-container {
   background-color: var(--surface-color);
   padding: 2rem;
   border-radius: 8px;
@@ -101,12 +102,12 @@ h2 {
   border-color: var(--primary-color);
 }
 
-/* Hide number input arrows */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
 input[type=number] {
   -moz-appearance: textfield;
 }
@@ -138,6 +139,7 @@ input[type=number] {
   background-color: var(--primary-color);
   color: var(--surface-color);
 }
+
 .btn.primary:hover {
   background-color: #ffad4a;
 }
@@ -146,20 +148,23 @@ input[type=number] {
   background-color: var(--danger-color);
   color: white;
 }
+
 .btn.danger:hover {
   background-color: #ff6b5a;
 }
 
 
 .screen {
-  background-color: #111;
-  height: 300px;
+  background-color: #000;
+  color: #98C379;
+  border: 2px solid #333;
   border-radius: 4px;
   padding: 1rem;
-  box-sizing: border-box;
+  height: 300px;
   overflow-y: auto;
-  font-family: 'VT323', monospace;
-  font-size: 1.2rem;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.9rem;
+  position: relative;
   line-height: 1.5;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -167,12 +172,26 @@ input[type=number] {
   flex-direction: column;
 }
 
+.mining-timer {
+  position: absolute;
+  bottom: 10px;
+  right: 15px;
+  font-family: 'VT323', monospace;
+  font-size: 1.5rem;
+  color: #0f0;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 2px 5px;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
 .mining-status {
   background-color: #222;
   padding: 0.5rem;
   border-radius: 4px;
   margin-bottom: 1rem;
-  color: #2ecc71; /* Green for status */
+  color: #DCDFE4;
   font-size: 1.1rem;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -188,17 +207,17 @@ input[type=number] {
 }
 
 .log-error {
-  color: var(--danger-color);
+  color: #E06C75;
 }
 
 .log-success {
-  color: #2ecc71;
+  color: #98C379;
 }
 
 .log-info {
-  color: #3498db;
+  color: #61AFEF;
 }
 
 .log-warn {
-  color: var(--primary-color);
+  color: #E06C75;
 }
