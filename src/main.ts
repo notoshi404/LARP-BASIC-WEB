@@ -197,10 +197,11 @@ function handleMine() {
     logToScreen(`--------------------------------`, 'normal');
 
     miningInterval = window.setInterval(() => {
-        const batchSize = 3;
+        const batchSize = 0.5;
 
         for (let i = 0; i < batchSize; i++) {
-            nonce_try++;
+            nonce_try = Math.floor(Math.random() * 999999);
+            //nonce_try++;
 
             if (nonce_try >= max_tries) {
                 logToScreen(`Stopped: Reached max tries (${max_tries}).`, 'warn');
